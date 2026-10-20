@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../models/game_models.dart';
 import '../theme/app_theme.dart';
 
@@ -22,13 +24,19 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProviderStateMixin {
   bool _flashOn = false;
+  bool _isProcessingCode = false;
   late AnimationController _laserController;
   late Animation<double> _laserAnimation;
+  late MobileScannerController _scannerController;
   final TextEditingController _pinController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _scannerController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.noDuplicates,
+      returnImage: false,
+    );
     _laserController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2200),
@@ -40,9 +48,51 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
 
   @override
   void dispose() {
+    _scannerController.dispose();
     _laserController.dispose();
     _pinController.dispose();
     super.dispose();
+  }
+
+  void _handleBarcodeDetected(BarcodeCapture capture) {
+    if (_isProcessingCode) return;
+    for (final barcode in capture.barcodes) {
+      final code = barcode.rawValue;
+      if (code != null && code.trim().isNotEmpty) {
+        setState(() => _isProcessingCode = true);
+        widget.onShowSnackBar('¡Código QR detectado: $code!');
+        widget.onRedeemCode(code.trim());
+        // Cool-off period before scanning again
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() => _isProcessingCode = false);
+          }
+        });
+        break;
+      }
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? file = await picker.pickImage(source: ImageSource.gallery);
+      if (file == null) return;
+
+      widget.onShowSnackBar('Analizando imagen de la galería...');
+      final BarcodeCapture? capture = await _scannerController.analyzeImage(file.path);
+      if (capture != null && capture.barcodes.isNotEmpty) {
+        final code = capture.barcodes.first.rawValue;
+        if (code != null && code.trim().isNotEmpty) {
+          widget.onShowSnackBar('¡Código QR encontrado: $code!');
+          widget.onRedeemCode(code.trim());
+          return;
+        }
+      }
+      widget.onShowSnackBar('No se detectó un código QR válido en la imagen');
+    } catch (e) {
+      widget.onShowSnackBar('Error al leer imagen: $e');
+    }
   }
 
   void _showManualCodeDialog() {
@@ -118,15 +168,49 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
             ),
             child: Stack(
               children: [
-                // Cam preview background texture
+                // Cam preview background with live MobileScanner
                 Positioned.fill(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(28),
-                    child: Container(
-                      color: _flashOn ? Colors.deepPurple.shade900.withOpacity(0.5) : const Color(0xFF161426),
-                      child: const Center(
-                        child: Icon(Icons.filter_center_focus, size: 48, color: Colors.white12),
-                      ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        MobileScanner(
+                          controller: _scannerController,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error) {
+                            return Container(
+                              color: const Color(0xFF161426),
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.videocam_off, color: GameZoneColors.error, size: 36),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Cámara inactiva o sin permisos',
+                                      style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12, fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Concede permiso de cámara en Ajustes para escanear en vivo',
+                                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 10),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          onDetect: _handleBarcodeDetected,
+                        ),
+                        // Tint overlay for cyberpunk look
+                        Container(
+                          color: _flashOn ? Colors.deepPurple.shade900.withOpacity(0.2) : Colors.black.withOpacity(0.12),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -176,12 +260,15 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                         color: GameZoneColors.surfaceContainerHigh.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.circle, color: GameZoneColors.tertiary, size: 8),
-                          SizedBox(width: 6),
-                          Text('Buscando QR...', style: TextStyle(color: Colors.white, fontSize: 11)),
+                          Icon(Icons.circle, color: _isProcessingCode ? GameZoneColors.secondary : GameZoneColors.tertiary, size: 8),
+                          const SizedBox(width: 6),
+                          Text(
+                            _isProcessingCode ? 'Procesando código...' : 'Buscando QR...',
+                            style: const TextStyle(color: Colors.white, fontSize: 11),
+                          ),
                         ],
                       ),
                     ),
@@ -203,9 +290,14 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                         color: _flashOn ? GameZoneColors.onTertiary : Colors.white,
                         size: 20,
                       ),
-                      onPressed: () {
-                        setState(() => _flashOn = !_flashOn);
-                        widget.onShowSnackBar(_flashOn ? 'Linterna encendida' : 'Linterna apagada');
+                      onPressed: () async {
+                        try {
+                          await _scannerController.toggleTorch();
+                          setState(() => _flashOn = !_flashOn);
+                          widget.onShowSnackBar(_flashOn ? 'Linterna encendida' : 'Linterna apagada');
+                        } catch (e) {
+                          widget.onShowSnackBar('Error al controlar linterna: $e');
+                        }
                       },
                     ),
                   ),
@@ -244,10 +336,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                onPressed: () {
-                  widget.onShowSnackBar('Simulando escaneo de QR...');
-                  widget.onRedeemCode('GZ-ZCOINS-1000');
-                },
+                onPressed: _pickImageFromGallery,
                 icon: const Icon(Icons.photo_library, size: 16, color: GameZoneColors.primary),
                 label: const Text('Elegir foto de la galería', style: TextStyle(color: GameZoneColors.primary, fontSize: 12)),
               ),

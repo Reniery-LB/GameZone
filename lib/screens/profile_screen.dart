@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/game_models.dart';
 import '../theme/app_theme.dart';
 
@@ -17,6 +19,32 @@ class ProfileScreen extends StatelessWidget {
     required this.onLogout,
     required this.onShowSnackBar,
   });
+
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
+    Navigator.of(context).pop();
+    try {
+      final picker = ImagePicker();
+      final XFile? file = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (file != null) {
+        onUpdateAvatar(file.path);
+        onShowSnackBar('¡Foto de perfil actualizada con éxito!');
+      }
+    } catch (e) {
+      onShowSnackBar('Error al acceder a la cámara/galería: $e');
+    }
+  }
+
+  ImageProvider _getAvatarProvider(String avatar) {
+    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+      return NetworkImage(avatar);
+    }
+    return FileImage(File(avatar));
+  }
 
   void _showCameraDialog(BuildContext context) {
     showModalBottomSheet(
@@ -48,10 +76,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               title: const Text('Tomar foto con Cámara'),
               subtitle: const Text('Modo Retrato Gaming'),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                onShowSnackBar('¡Foto tomada! Avatar actualizado');
-              },
+              onTap: () => _pickImage(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const CircleAvatar(
@@ -60,10 +85,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               title: const Text('Elegir de Galería'),
               subtitle: const Text('Formatos PNG, JPG'),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                onShowSnackBar('Foto de perfil actualizada desde galería');
-              },
+              onTap: () => _pickImage(ctx, ImageSource.gallery),
             ),
           ],
         ),
@@ -91,7 +113,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 child: CircleAvatar(
-                  backgroundImage: NetworkImage(user.avatar),
+                  backgroundImage: _getAvatarProvider(user.avatar),
                   backgroundColor: GameZoneColors.surfaceContainerHigh,
                 ),
               ),

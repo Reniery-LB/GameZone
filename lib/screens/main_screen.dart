@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/game_models.dart';
 import '../theme/app_theme.dart';
@@ -118,6 +119,13 @@ class _MainScreenState extends State<MainScreen> {
       }
     });
     _showSnackBar('¡Código $code canjeado exitosamente!');
+  }
+
+  ImageProvider _getAvatarProvider(String avatar) {
+    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+      return NetworkImage(avatar);
+    }
+    return FileImage(File(avatar));
   }
 
   @override
@@ -249,7 +257,7 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () => setState(() => _currentIndex = 3),
               child: CircleAvatar(
                 radius: 16,
-                backgroundImage: NetworkImage(_currentUser.avatar),
+                backgroundImage: _getAvatarProvider(_currentUser.avatar),
               ),
             ),
           ),
@@ -263,7 +271,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: SafeArea(
           child: SizedBox(
-            height: 70,
+            height: 76,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -310,13 +318,13 @@ class _MainScreenState extends State<MainScreen> {
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
       child: Transform.translate(
-        offset: const Offset(0, -10),
+        offset: const Offset(0, -6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [GameZoneColors.primaryContainer, GameZoneColors.tertiary],
