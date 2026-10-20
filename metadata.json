@@ -1,0 +1,6 @@
+{
+  "name": "GameZone - Next-Gen Gaming Hub",
+  "description": "Tu tienda de videojuegos definitiva, biblioteca digital, escáner de recompensas y comunidad gamer con estética Material You y Cyberpunk.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

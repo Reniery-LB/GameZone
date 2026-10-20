@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "18184194100",
+    "project_id": "gamezone-54533",
+    "storage_bucket": "gamezone-54533.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18184194100:android:c2a50a5717ffef14b66261",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIiVxztgObISxAjjCqfX_KEpPSY2vB-80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
