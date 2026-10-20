@@ -94,31 +94,58 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void _redeemCode(String code) {
+  void _redeemCode(String rawCode) {
+    final code = rawCode.trim();
+    final upper = code.toUpperCase();
+    final isXP = upper.contains('XP');
+    final isCoin = upper.contains('COIN') || upper.contains('ZC') || upper.contains('Z-COIN');
+    final isUrl = upper.startsWith('HTTP://') || upper.startsWith('HTTPS://') || upper.startsWith('WWW.');
+
+    String title;
+    String badgeText;
+    String badgeType;
+
+    if (isXP) {
+      title = 'Paquete de Experiencia Épica';
+      badgeText = '+1,000 XP';
+      badgeType = 'xp';
+    } else if (isCoin) {
+      title = 'Bolsa de 1,000 Z-Coins';
+      badgeText = '+1,000 ZC';
+      badgeType = 'success';
+    } else if (isUrl) {
+      title = 'Recompensa Enlace Web';
+      badgeText = '+500 ZC';
+      badgeType = 'success';
+    } else {
+      title = 'Bono Especial GameZone';
+      badgeText = '+500 Pts';
+      badgeType = 'xp';
+    }
+
     setState(() {
+      if (badgeText.contains('ZC')) {
+        _currentUser.zCoins += isCoin ? 1000 : 500;
+      } else {
+        _currentUser.pointsCount += isXP ? 1000 : 500;
+      }
+
       _rewards.insert(
         0,
         RewardItem(
           id: 'rew-${DateTime.now().millisecondsSinceEpoch}',
-          title: code.contains('XP')
-              ? 'Paquete de Experiencia Épica'
-              : (code.contains('ZCOIN') ? 'Bolsa de 1,000 Z-Coins' : 'Recompensa Canjeada'),
-          code: code,
+          title: title,
+          code: code.length > 25 ? '${code.substring(0, 22)}...' : code,
           statusText: 'Canjeado con éxito',
           dateText: 'Ahora',
           subtext: 'Activado en tu inventario',
           iconName: 'redeem',
-          badgeText: code.contains('XP') ? '+1,000 XP' : '+1,000 ZC',
-          badgeType: code.contains('XP') ? 'xp' : 'success',
+          badgeText: badgeText,
+          badgeType: badgeType,
         ),
       );
-      if (code.contains('ZCOIN')) {
-        _currentUser.zCoins += 1000;
-      } else {
-        _currentUser.pointsCount += 500;
-      }
     });
-    _showSnackBar('¡Código $code canjeado exitosamente!');
+    _showSnackBar('¡Código canjeado: $badgeText añadidos!');
   }
 
   ImageProvider _getAvatarProvider(String avatar) {

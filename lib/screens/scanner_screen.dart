@@ -464,8 +464,18 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      Text('Código: ${item.code}', style: const TextStyle(color: GameZoneColors.primary, fontSize: 11)),
+                      Text(
+                        item.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Código: ${item.code}',
+                        style: const TextStyle(color: GameZoneColors.primary, fontSize: 11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
