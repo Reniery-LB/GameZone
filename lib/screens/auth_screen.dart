@@ -32,26 +32,34 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController _emailController = TextEditingController();
 
   void _showError(Object error, String action) {
-    final message = error is FirebaseAuthException
-        ? switch (error.code) {
-            'invalid-email' => 'El correo electrónico no tiene un formato válido.',
-            'user-not-found' || 'wrong-password' || 'invalid-credential' =>
-              'Correo o contraseña incorrectos.',
-            'email-already-in-use' => 'Ese correo ya tiene una cuenta. Inicia sesión.',
-            'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
-            'operation-not-allowed' =>
-              'Este método de acceso aún no está activado en Firebase.',
-            'account-exists-with-different-credential' =>
-              'Ese correo ya está asociado a otro método de acceso.',
-            'network-request-failed' =>
-              'Revisa tu conexión a internet e inténtalo de nuevo.',
-            'too-many-requests' =>
-              'Hubo demasiados intentos. Espera un momento y vuelve a intentar.',
-            'popup-closed-by-user' || 'web-context-cancelled' =>
-              'Se canceló el inicio de sesión.',
-            _ => error.message ?? 'Ocurrió un error de autenticación.',
-          }
-        : error.toString();
+    final String message;
+    if (error is FirebaseAuthException) {
+      message = switch (error.code) {
+        'invalid-email' => 'El correo electrónico no tiene un formato válido.',
+        'user-not-found' || 'wrong-password' || 'invalid-credential' =>
+          'Correo o contraseña incorrectos.',
+        'email-already-in-use' => 'Ese correo ya tiene una cuenta. Inicia sesión.',
+        'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
+        'operation-not-allowed' =>
+          'Este método de acceso aún no está activado en Firebase.',
+        'account-exists-with-different-credential' =>
+          'Ese correo ya está asociado a otro método de acceso.',
+        'network-request-failed' =>
+          'Revisa tu conexión a internet e inténtalo de nuevo.',
+        'too-many-requests' =>
+          'Hubo demasiados intentos. Espera un momento y vuelve a intentar.',
+        'popup-closed-by-user' || 'web-context-cancelled' =>
+          'Se canceló el inicio de sesión.',
+        _ => error.message ?? 'Ocurrió un error de autenticación.',
+      };
+    } else {
+      final errStr = error.toString().toLowerCase();
+      if (errStr.contains('cancel') || errStr.contains('dismissed')) {
+        message = 'Se canceló el inicio de sesión.';
+      } else {
+        message = error.toString();
+      }
+    }
     widget.onShowSnackBar('$action: $message');
   }
 
@@ -103,7 +111,9 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         final googleSignIn = GoogleSignIn.instance;
         if (!_googleSignInInitialized) {
-          await googleSignIn.initialize();
+          await googleSignIn.initialize(
+            serverClientId: '18184194100-imlu27c6riqoa54jncngg7knsl8f10ag.apps.googleusercontent.com',
+          );
           _googleSignInInitialized = true;
         }
         final googleUser = await googleSignIn.authenticate();
