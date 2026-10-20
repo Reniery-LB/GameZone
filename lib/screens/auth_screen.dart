@@ -178,6 +178,8 @@ class _AuthScreenState extends State<AuthScreen> {
     }
     await _runAuthAction(() async {
       final githubProvider = GithubAuthProvider();
+      githubProvider.addScope('read:user');
+      githubProvider.addScope('user:email');
       if (kIsWeb) {
         await FirebaseAuth.instance.signInWithPopup(githubProvider);
       } else {
