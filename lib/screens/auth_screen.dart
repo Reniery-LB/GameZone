@@ -150,7 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
 
       final result = await FacebookAuth.instance.login(
-        permissions: const ['email', 'public_profile'],
+        permissions: const ['public_profile'],
       );
       if (result.status == LoginStatus.cancelled) return;
       if (result.status != LoginStatus.success || result.accessToken == null) {
