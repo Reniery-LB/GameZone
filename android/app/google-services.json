@@ -9,6 +9,50 @@
       "client_info": {
         "mobilesdk_app_id": "1:18184194100:android:c2a50a5717ffef14b66261",
         "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "18184194100-730bqul81qlr58ls9uh34cj83uitar6q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutter_application_1",
+            "certificate_hash": "c0585bfc72c7f63489af8c98407e9008f153cbe2"
+          }
+        },
+        {
+          "client_id": "18184194100-imlu27c6riqoa54jncngg7knsl8f10ag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIiVxztgObISxAjjCqfX_KEpPSY2vB-80"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "18184194100-imlu27c6riqoa54jncngg7knsl8f10ag.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "18184194100-3js8m2erl6cq1lbjggnbkphs6kk6tl2n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterApplication1"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18184194100:android:648a32cd9d551d3cb66261",
+        "android_client_info": {
           "package_name": "com.gamezone.hub"
         }
       },

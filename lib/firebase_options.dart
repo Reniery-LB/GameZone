@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAIiVxztgObISxAjjCqfX_KEpPSY2vB-80',
-    appId: '1:18184194100:android:c2a50a5717ffef14b66261',
+    appId: '1:18184194100:android:648a32cd9d551d3cb66261',
     messagingSenderId: '18184194100',
     projectId: 'gamezone-54533',
     storageBucket: 'gamezone-54533.firebasestorage.app',
