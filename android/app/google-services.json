@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:18184194100:android:c2a50a5717ffef14b66261",
         "android_client_info": {
-          "package_name": "com.example.flutter_application_1"
+          "package_name": "com.gamezone.hub"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "18184194100-730bqul81qlr58ls9uh34cj83uitar6q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.flutter_application_1",
+            "package_name": "com.gamezone.hub",
             "certificate_hash": "c0585bfc72c7f63489af8c98407e9008f153cbe2"
           }
         },
