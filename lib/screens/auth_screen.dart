@@ -149,7 +149,9 @@ class _AuthScreenState extends State<AuthScreen> {
         return;
       }
 
-      final result = await FacebookAuth.instance.login();
+      final result = await FacebookAuth.instance.login(
+        permissions: const ['email', 'public_profile'],
+      );
       if (result.status == LoginStatus.cancelled) return;
       if (result.status != LoginStatus.success || result.accessToken == null) {
         throw FirebaseAuthException(
